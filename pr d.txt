@@ -1,0 +1,2804 @@
+package OOP;
+
+
+
+import javax.swing.*;
+
+import javax.swing.border.EmptyBorder;
+
+import javax.swing.table.DefaultTableModel;
+
+import java.awt.*;
+
+import java.awt.event.*;
+
+import java.text.NumberFormat;
+
+import java.util.*;
+
+
+
+public class EventVerseApp {
+
+
+
+    // ================= DATA =================
+
+    static ArrayList<User> users = new ArrayList<>();
+
+    static ArrayList<Event> events = new ArrayList<>();
+
+    static ArrayList<Venue> venues = new ArrayList<>();
+
+    static ArrayList<FoodItem> foodItems = new ArrayList<>();
+
+    static ArrayList<FoodPackage> foodPackages = new ArrayList<>();
+
+    static ArrayList<ServiceItem> services = new ArrayList<>();
+
+
+
+    static User loggedInUser;
+
+
+
+    // ================= GUI =================
+
+    static JFrame frame;
+
+    static JPanel rootPanel;
+
+    static JPanel centerPanel;
+
+    static JLabel pageTitleLabel;
+
+
+
+    // ================= COLORS =================
+
+    static final Color NAVY = new Color(7, 29, 78);
+
+    static final Color NAVY_2 = new Color(19, 52, 120);
+
+    static final Color BLUE = new Color(29, 103, 238);
+
+    static final Color PURPLE = new Color(116, 48, 230);
+
+    static final Color BG = new Color(245, 247, 253);
+
+    static final Color TEXT = new Color(20, 35, 75);
+
+    static final Color MUTED = new Color(105, 115, 140);
+
+    static final Color CARD_BORDER = new Color(225, 230, 243);
+
+
+
+    static final NumberFormat MONEY = NumberFormat.getNumberInstance(Locale.US);
+
+
+
+    public static void main(String[] args) {
+
+        SwingUtilities.invokeLater(() -> {
+
+            MONEY.setMinimumFractionDigits(0);
+
+            MONEY.setMaximumFractionDigits(0);
+
+            setLookAndFeel();
+
+            loadDefaultData();
+
+            createWindow();
+
+            showLogin();
+
+        });
+
+    }
+
+
+
+    static void setLookAndFeel() {
+
+        try {
+
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+        } catch (Exception ignored) {}
+
+    }
+
+
+
+    static void createWindow() {
+
+        frame = new JFrame("AEGIX - Event Management System");
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        frame.setSize(1250, 780);
+
+        frame.setMinimumSize(new Dimension(1000, 650));
+
+        frame.setLocationRelativeTo(null);
+
+
+
+        rootPanel = new JPanel(new BorderLayout());
+
+        rootPanel.setBackground(BG);
+
+        frame.setContentPane(rootPanel);
+
+        frame.setVisible(true);
+
+    }
+
+
+
+    // ================= DEFAULT DATA =================
+
+    static void loadDefaultData() {
+
+        users.add(new Admin("Administrator", "admin@eventverse.com", "1234"));
+
+        users.add(new Organizer("Demo Organizer", "organizer@eventverse.com", "1234"));
+
+
+
+        venues.add(new Venue("City Convention Center", "Dhaka", 500, 30000));
+
+        venues.add(new Venue("Noorzahan Convention Center", "Pabna", 600, 25000));
+        venues.add(new Venue("Green Chilli Convention Center", "Shazadpur", 500, 35000));
+        venues.add(new Venue("Grand Community Hall", "Dhaka", 300, 18000));
+
+        venues.add(new Venue("University Auditorium", "Dhaka", 1000, 50000));
+
+        venues.add(new Venue("Garden Resort", "Gazipur", 700, 65000));
+
+        venues.add(new Venue("Royal Banquet Hall", "Khulna", 200, 15000));
+
+
+
+        // Food items: Admin can add more items later.
+
+        foodItems.add(new FoodItem("Rice", 40));
+
+        foodItems.add(new FoodItem("Chicken Roast", 180));
+
+        foodItems.add(new FoodItem("Kacchi", 250));
+
+        foodItems.add(new FoodItem("Fish Fry", 120));
+
+        foodItems.add(new FoodItem("Salad", 40));
+
+        foodItems.add(new FoodItem("Soft Drink", 30));
+
+        foodItems.add(new FoodItem("Dessert", 60));
+
+        foodItems.add(new FoodItem("Vegetables", 50));
+
+        foodItems.add(new FoodItem("Beef Rezala", 220));
+
+
+
+        FoodPackage basic = new FoodPackage("Basic Package");
+
+        basic.addItem(findFood("Rice"));
+
+        basic.addItem(findFood("Chicken Roast"));
+
+        basic.addItem(findFood("Vegetables"));
+
+        basic.addItem(findFood("Soft Drink"));
+
+        foodPackages.add(basic);
+
+
+
+        FoodPackage standard = new FoodPackage("Standard Package");
+
+        standard.addItem(findFood("Kacchi"));
+
+        standard.addItem(findFood("Chicken Roast"));
+
+        standard.addItem(findFood("Salad"));
+
+        standard.addItem(findFood("Dessert"));
+
+        standard.addItem(findFood("Soft Drink"));
+
+        foodPackages.add(standard);
+
+
+
+        FoodPackage premium = new FoodPackage("Premium Package");
+
+        premium.addItem(findFood("Kacchi"));
+
+        premium.addItem(findFood("Beef Rezala"));
+
+        premium.addItem(findFood("Chicken Roast"));
+
+        premium.addItem(findFood("Fish Fry"));
+
+        premium.addItem(findFood("Dessert"));
+
+        premium.addItem(findFood("Soft Drink"));
+
+        foodPackages.add(premium);
+
+
+
+        services.add(new ServiceItem("Basic Decoration", 10000, "Simple event decoration"));
+
+        services.add(new ServiceItem("Standard Decoration", 25000, "Professional decoration"));
+
+        services.add(new ServiceItem("Premium Decoration", 50000, "Premium themed decoration"));
+
+        services.add(new ServiceItem("Photography", 15000, "Professional photography"));
+
+        services.add(new ServiceItem("Videography", 20000, "Full video coverage"));
+
+        services.add(new ServiceItem("Sound System", 10000, "Speakers and microphones"));
+
+        services.add(new ServiceItem("Stage Setup", 20000, "Stage and backdrop"));
+
+        services.add(new ServiceItem("Special Lighting", 15000, "Professional lighting"));
+
+    }
+
+
+
+    static FoodItem findFood(String name) {
+
+        for (FoodItem item : foodItems) {
+
+            if (item.name.equals(name)) return item;
+
+        }
+
+        return null;
+
+    }
+
+
+
+    // ================= LOGIN =================
+
+    static void showLogin() {
+
+        rootPanel.removeAll();
+
+        rootPanel.setLayout(new GridBagLayout());
+
+
+
+        GradientPanel background = new GradientPanel(NAVY, PURPLE, 0);
+
+        background.setLayout(new GridBagLayout());
+
+        rootPanel.add(background, new GridBagConstraints());
+
+
+
+        JPanel loginCard = new RoundedPanel(28, Color.WHITE);
+
+        loginCard.setPreferredSize(new Dimension(470, 560));
+
+        loginCard.setLayout(new BoxLayout(loginCard, BoxLayout.Y_AXIS));
+
+        loginCard.setBorder(new EmptyBorder(35, 45, 35, 45));
+
+
+
+        EventVerseMark icon = new EventVerseMark(64);
+
+        icon.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+
+        JLabel title = new JLabel("AEGIEX-EVENTVERSE");
+
+        title.setFont(new Font("Arial", Font.BOLD, 31));
+
+        title.setForeground(NAVY);
+
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+
+        JLabel subtitle = new JLabel("Plan · Organize · Celebrate");
+
+        subtitle.setFont(new Font("Arial", Font.PLAIN, 15));
+
+        subtitle.setForeground(MUTED);
+
+        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+
+        JTextField emailField = new JTextField();
+
+        JPasswordField passwordField = new JPasswordField();
+
+        styleInput(emailField);
+
+        styleInput(passwordField);
+
+
+
+        JLabel emailLabel = fieldLabel("Email Address");
+
+        JLabel passwordLabel = fieldLabel("Password");
+
+
+
+        JButton loginButton = new GradientButton("LOGIN");
+
+        loginButton.setForeground(Color.WHITE);
+
+        loginButton.setFont(new Font("Arial", Font.BOLD, 16));
+
+        loginButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
+
+        loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+
+        JButton registerButton = new JButton("CREATE AN ACCOUNT");
+
+        styleOutlineButton(registerButton);
+
+        registerButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
+
+        registerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+
+        JLabel demo = new JLabel("Admin: admin@eventverse.com / 1234");
+
+        demo.setForeground(MUTED);
+
+        demo.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        demo.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+
+        loginCard.add(icon);
+
+        loginCard.add(Box.createVerticalStrut(8));
+
+        loginCard.add(title);
+
+        loginCard.add(Box.createVerticalStrut(5));
+
+        loginCard.add(subtitle);
+
+        loginCard.add(Box.createVerticalStrut(30));
+
+        loginCard.add(emailLabel);
+
+        loginCard.add(Box.createVerticalStrut(6));
+
+        loginCard.add(emailField);
+
+        loginCard.add(Box.createVerticalStrut(18));
+
+        loginCard.add(passwordLabel);
+
+        loginCard.add(Box.createVerticalStrut(6));
+
+        loginCard.add(passwordField);
+
+        loginCard.add(Box.createVerticalStrut(25));
+
+        loginCard.add(loginButton);
+
+        loginCard.add(Box.createVerticalStrut(12));
+
+        loginCard.add(registerButton);
+
+        loginCard.add(Box.createVerticalStrut(20));
+
+        loginCard.add(demo);
+
+
+
+        loginButton.addActionListener(e -> {
+
+            String email = emailField.getText().trim();
+
+            String password = new String(passwordField.getPassword());
+
+            for (User user : users) {
+
+                if (user.email.equalsIgnoreCase(email) && user.password.equals(password)) {
+
+                    loggedInUser = user;
+
+                    showDashboard();
+
+                    return;
+
+                }
+
+            }
+
+            JOptionPane.showMessageDialog(frame, "Invalid email or password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
+
+        });
+
+
+
+        registerButton.addActionListener(e -> showRegisterDialog());
+
+
+
+        background.add(loginCard);
+
+        refresh();
+
+    }
+
+
+
+    static JLabel fieldLabel(String text) {
+
+        JLabel label = new JLabel(text);
+
+        label.setFont(new Font("Arial", Font.BOLD, 14));
+
+        label.setForeground(TEXT);
+
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        return label;
+
+    }
+
+
+
+    static void styleInput(JTextField field) {
+
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+
+        field.setPreferredSize(new Dimension(350, 45));
+
+        field.setFont(new Font("Arial", Font.PLAIN, 15));
+
+        field.setBorder(BorderFactory.createCompoundBorder(
+
+                BorderFactory.createLineBorder(new Color(215, 220, 235)),
+
+                new EmptyBorder(5, 12, 5, 12)));
+
+    }
+
+
+
+    static void showRegisterDialog() {
+
+        JTextField name = new JTextField();
+
+        JTextField email = new JTextField();
+
+        JPasswordField password = new JPasswordField();
+
+        Object[] fields = {"Full Name", name, "Email", email, "Password", password};
+
+        int result = JOptionPane.showConfirmDialog(frame, fields, "Create Organizer Account", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result != JOptionPane.OK_OPTION) return;
+
+
+
+        String n = name.getText().trim();
+
+        String e = email.getText().trim();
+
+        String p = new String(password.getPassword());
+
+        if (n.isEmpty() || e.isEmpty() || p.isEmpty()) {
+
+            message("Please fill all fields.", true);
+
+            return;
+
+        }
+
+        for (User user : users) {
+
+            if (user.email.equalsIgnoreCase(e)) {
+
+                message("This email is already registered.", true);
+
+                return;
+
+            }
+
+        }
+
+        users.add(new Organizer(n, e, p));
+
+        message("An account created successfully!", false);
+
+    }
+
+
+
+    // ================= DASHBOARD SHELL =================
+
+    static void showDashboard() {
+
+        rootPanel.removeAll();
+
+        rootPanel.setLayout(new BorderLayout());
+
+
+
+        JPanel sidebar = buildSidebar();
+
+        rootPanel.add(sidebar, BorderLayout.WEST);
+
+
+
+        JPanel right = new JPanel(new BorderLayout());
+
+        right.setBackground(BG);
+
+        right.add(buildTopBar(), BorderLayout.NORTH);
+
+
+
+        centerPanel = new JPanel(new BorderLayout());
+
+        centerPanel.setBackground(BG);
+
+        right.add(centerPanel, BorderLayout.CENTER);
+
+
+
+        rootPanel.add(right, BorderLayout.CENTER);
+
+        showHomePage();
+
+        refresh();
+
+    }
+
+
+
+    static JPanel buildSidebar() {
+        JPanel sidebar = new JPanel(new BorderLayout());
+        sidebar.setBackground(NAVY);
+        sidebar.setPreferredSize(new Dimension(245, 0));
+
+        // Logo ও নাম
+        JPanel brand = new JPanel();
+        brand.setBackground(NAVY);
+        brand.setBorder(new EmptyBorder(18, 8, 18, 8));
+        brand.setLayout(new BoxLayout(brand, BoxLayout.Y_AXIS));
+
+        JLabel logoMark = new JLabel(new SidebarIcon("brand"));
+        logoMark.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel logo = new JLabel("EVENTVERSE", SwingConstants.CENTER);
+        logo.setForeground(Color.WHITE);
+        logo.setFont(new Font("Arial", Font.BOLD, 23));
+        logo.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel tagline = new JLabel("Plan · Organize · Celebrate", SwingConstants.CENTER);
+        tagline.setForeground(new Color(215, 220, 240));
+        tagline.setFont(new Font("Arial", Font.ITALIC, 13));
+        tagline.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        brand.add(logoMark);
+        brand.add(Box.createVerticalStrut(8));
+        brand.add(logo);
+        brand.add(Box.createVerticalStrut(5));
+        brand.add(tagline);
+        sidebar.add(brand, BorderLayout.NORTH);
+
+        // Option buttons: GridLayout এগুলোকে পুরো row জুড়ে রাখবে
+        JPanel options = new JPanel(new GridLayout(0, 1, 0, 8));
+        options.setBackground(NAVY);
+        options.setBorder(new EmptyBorder(5, 0, 12, 0));
+
+        JButton dashboard = menuButton1("home", "Dashboard");
+        JButton create = menuButton1("plus", "Create Event");
+        JButton events = menuButton1("calendar", "My Events");
+        JButton venues = menuButton1("pin", "Venues");
+        JButton food = menuButton1("food", "Food Packages");
+        JButton services = menuButton1("settings", "Event Services");
+
+        options.add(dashboard);
+        options.add(create);
+        options.add(events);
+        options.add(venues);
+        options.add(food);
+        options.add(services);
+
+        dashboard.addActionListener(e -> showHomePage());
+        create.addActionListener(e -> createEvent());
+        events.addActionListener(e -> showMyEvents());
+        venues.addActionListener(e -> showVenues());
+        food.addActionListener(e -> showFoodPackages());
+        services.addActionListener(e -> showServices());
+
+        if (loggedInUser instanceof Admin) {
+            JButton admin = menuButton1("settings", "Admin Panel");
+            options.add(admin);
+            admin.addActionListener(e -> showAdminPanel());
+        }
+
+        sidebar.add(options, BorderLayout.CENTER);
+
+        // Logout
+        JButton logout = menuButton1("logout", "Logout");
+        JPanel bottom = new JPanel(new BorderLayout(0, 10));
+        bottom.setBackground(NAVY);
+        bottom.setBorder(new EmptyBorder(10, 0, 12, 0));
+        bottom.add(new JSeparator(), BorderLayout.NORTH);
+        bottom.add(logout, BorderLayout.SOUTH);
+
+        logout.addActionListener(e -> {
+            loggedInUser = null;
+            showLogin();
+        });
+
+        sidebar.add(bottom, BorderLayout.SOUTH);
+        return sidebar;
+    }
+
+    static JButton menuButton1(String iconName, String text) {
+        JButton button = new JButton(text, new SidebarIcon(iconName));
+        button.setIconTextGap(14);
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setFont(new Font("Arial", Font.BOLD, 15));
+        button.setForeground(Color.WHITE);
+        button.setBackground(NAVY_2);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setMargin(new Insets(0, 18, 0, 8));
+        return button;
+    }
+    static class SidebarIcon implements Icon {
+        private final String type;
+
+        SidebarIcon(String type) {
+            this.type = type;
+        }
+
+        public int getIconWidth() { return 25; }
+        public int getIconHeight() { return 25; }
+
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Color.WHITE);
+            g2.setStroke(new BasicStroke(2.5f));
+
+            int a = x + 2;
+            int b = y + 2;
+
+            switch (type) {
+                case "home":
+                    Polygon house = new Polygon(
+                        new int[]{a+1, a+11, a+21, a+18, a+18, a+13, a+13, a+8, a+8, a+4},
+                        new int[]{b+11, b+2, b+11, b+11, b+21, b+21, b+15, b+15, b+21, b+21},
+                        10
+                    );
+                    g2.fillPolygon(house);
+                    break;
+
+                case "plus":
+                    g2.drawOval(a+2, b+2, 20, 20);
+                    g2.setStroke(new BasicStroke(3f));
+                    g2.drawLine(a+12, b+7, a+12, b+17);
+                    g2.drawLine(a+7, b+12, a+17, b+12);
+                    break;
+
+                case "calendar":
+                    g2.drawRoundRect(a+2, b+4, 20, 17, 3, 3);
+                    g2.drawLine(a+2, b+9, a+22, b+9);
+                    g2.drawLine(a+7, b+2, a+7, b+7);
+                    g2.drawLine(a+17, b+2, a+17, b+7);
+                    g2.drawLine(a+7, b+14, a+9, b+14);
+                    g2.drawLine(a+15, b+14, a+17, b+14);
+                    break;
+
+                case "pin":
+                    g2.drawOval(a+5, b+2, 14, 14);
+                    g2.drawLine(a+5, b+12, a+12, b+22);
+                    g2.drawLine(a+19, b+12, a+12, b+22);
+                    g2.drawOval(a+9, b+6, 6, 6);
+                    break;
+
+                case "food":
+                    g2.drawLine(a+6, b+3, a+6, b+21);
+                    g2.drawLine(a+3, b+3, a+3, b+8);
+                    g2.drawLine(a+9, b+3, a+9, b+8);
+                    g2.drawLine(a+3, b+8, a+9, b+8);
+                    g2.drawLine(a+17, b+3, a+17, b+21);
+                    g2.drawArc(a+14, b+3, 7, 10, 180, 180);
+                    break;
+
+                case "settings":
+                    g2.drawOval(a+6, b+6, 12, 12);
+                    g2.drawOval(a+10, b+10, 4, 4);
+                    g2.drawLine(a+12, b+1, a+12, b+6);
+                    g2.drawLine(a+12, b+18, a+12, b+23);
+                    g2.drawLine(a+1, b+12, a+6, b+12);
+                    g2.drawLine(a+18, b+12, a+23, b+12);
+                    break;
+
+                case "logout":
+                    g2.drawRoundRect(a+2, b+3, 11, 18, 2, 2);
+                    g2.drawLine(a+10, b+12, a+22, b+12);
+                    g2.drawLine(a+17, b+7, a+22, b+12);
+                    g2.drawLine(a+17, b+17, a+22, b+12);
+                    break;
+            }
+
+            g2.dispose();
+        }
+    }
+
+
+    static JButton menuButton(String icon, String text) {
+
+        JButton button = new JButton((icon == null || icon.trim().isEmpty()) ? text : icon + "     " + text);
+
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 54));
+
+        button.setPreferredSize(new Dimension(220, 54));
+
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+
+        button.setForeground(Color.WHITE);
+
+        button.setBackground(NAVY_2);
+
+        button.setFont(new Font("Arial", Font.BOLD, 15));
+
+        button.setFocusPainted(false);
+
+        button.setBorderPainted(false);
+
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        return button;
+
+    }
+
+
+
+    static JPanel buildTopBar() {
+
+        JPanel top = new JPanel(new BorderLayout());
+
+        top.setBackground(Color.WHITE);
+
+        top.setPreferredSize(new Dimension(0, 72));
+
+        top.setBorder(new EmptyBorder(0, 28, 0, 28));
+
+
+
+        pageTitleLabel = new JLabel("Dashboard");
+
+        pageTitleLabel.setFont(new Font("Arial", Font.BOLD, 22));
+
+        pageTitleLabel.setForeground(TEXT);
+
+
+
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 18));
+
+        right.setOpaque(false);
+
+        JLabel bell = new JLabel("!");
+
+        bell.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 22));
+
+        JLabel user = new JLabel("●  " + loggedInUser.name + " (" + loggedInUser.getRole() + ")");
+
+        user.setForeground(BLUE);
+
+        user.setFont(new Font("Arial", Font.BOLD, 14));
+
+        right.add(bell);
+
+        right.add(user);
+
+
+
+        top.add(pageTitleLabel, BorderLayout.WEST);
+
+        top.add(right, BorderLayout.EAST);
+
+        return top;
+
+    }
+
+
+
+    static void setPageTitle(String title) {
+
+        if (pageTitleLabel != null) pageTitleLabel.setText(title);
+
+    }
+
+
+
+    static void setCenter(JComponent component) {
+
+        centerPanel.removeAll();
+
+        centerPanel.add(component, BorderLayout.CENTER);
+
+        refresh();
+
+    }
+
+
+
+    // ================= HOME =================
+
+    static void showHomePage() {
+        setPageTitle("Dashboard");
+
+        JPanel body = new JPanel();
+        body.setBackground(BG);
+        body.setBorder(new EmptyBorder(22, 24, 25, 24));
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+
+        GradientPanel banner = new GradientPanel(new Color(0, 45, 150), new Color(112, 35, 220), 24);
+        banner.setPreferredSize(new Dimension(900, 185));
+        banner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 185));
+        banner.setBorder(new EmptyBorder(25, 35, 25, 30));
+        banner.setLayout(new BorderLayout(15, 0));
+
+        JPanel welcomeText = new JPanel();
+        welcomeText.setOpaque(false);
+        welcomeText.setLayout(new BoxLayout(welcomeText, BoxLayout.Y_AXIS));
+        JLabel welcome = new JLabel("Welcome, " + loggedInUser.name + "!");
+        welcome.setForeground(Color.WHITE);
+        welcome.setFont(new Font("Arial", Font.BOLD, 34));
+        JLabel subtitle = new JLabel("Plan and organize your complete event from one place.");
+        subtitle.setForeground(Color.WHITE);
+        subtitle.setFont(new Font("Arial", Font.PLAIN, 18));
+        welcomeText.add(Box.createVerticalGlue());
+        welcomeText.add(welcome);
+        welcomeText.add(Box.createVerticalStrut(12));
+        welcomeText.add(subtitle);
+        welcomeText.add(Box.createVerticalGlue());
+
+        JLabel bannerArt = new JLabel("<html><div style='text-align:center;color:white;'><span style='font-size:48px;'>🎉</span><br><i style='font-size:20px;'>Make Your<br>Event Special</i></div></html>");
+        bannerArt.setHorizontalAlignment(SwingConstants.CENTER);
+        banner.add(welcomeText, BorderLayout.CENTER);
+        banner.add(bannerArt, BorderLayout.EAST);
+
+        JPanel stats = new JPanel(new GridLayout(1, 3, 16, 0));
+        stats.setOpaque(false);
+        stats.setMaximumSize(new Dimension(Integer.MAX_VALUE, 125));
+        stats.add(createDashboardStat(" ", String.valueOf(events.size()), "Events Hosted", new Color(94, 35, 220), new Color(150, 75, 245)));
+        stats.add(createDashboardStat(">ᴗ<", "1K+", "Happy Clients", new Color(0, 105, 225), new Color(50, 160, 250)));
+        stats.add(createDashboardStat(" ", "4.9", "Client Rating", new Color(150, 45, 220), new Color(205, 80, 235)));
+
+        RoundedPanel servicesCard = new RoundedPanel(22, Color.WHITE);
+        servicesCard.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(CARD_BORDER), new EmptyBorder(16, 18, 18, 18)));
+        servicesCard.setLayout(new BorderLayout(0, 12));
+        servicesCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 210));
+        JPanel servicesHeader = new JPanel(new BorderLayout());
+        servicesHeader.setOpaque(false);
+        JLabel servicesTitle = new JLabel("  Our Services");
+        servicesTitle.setFont(new Font("Arial", Font.BOLD, 22));
+        servicesTitle.setForeground(TEXT);
+        JButton explore = new JButton("Explore All  →");
+        styleOutlineButton(explore);
+        explore.setBorderPainted(false);
+        explore.addActionListener(e -> showServices());
+        servicesHeader.add(servicesTitle, BorderLayout.WEST);
+        servicesHeader.add(explore, BorderLayout.EAST);
+
+        JPanel serviceTiles = new JPanel(new GridLayout(1, 6, 10, 0));
+        serviceTiles.setOpaque(false);
+        serviceTiles.add(createServiceTile(" ", "Premium", "Venues"));
+        serviceTiles.add(createServiceTile(" ", "Delicious", "Food Packages"));
+        serviceTiles.add(createServiceTile(" ", "Professional", "Event Services"));
+        serviceTiles.add(createServiceTile(" ", "Easy", "Booking"));
+        serviceTiles.add(createServiceTile(" ", "Secure", "Payment"));
+        serviceTiles.add(createServiceTile(" ", "24/7", "Support"));
+        servicesCard.add(servicesHeader, BorderLayout.NORTH);
+        servicesCard.add(serviceTiles, BorderLayout.CENTER);
+
+        GradientPanel createBanner = new GradientPanel(new Color(206, 218, 255), new Color(175, 194, 255), 22);
+        createBanner.setPreferredSize(new Dimension(900, 135));
+        createBanner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 135));
+        createBanner.setBorder(new EmptyBorder(15, 24, 15, 24));
+        createBanner.setLayout(new BorderLayout(15, 0));
+        JLabel gift = new JLabel("EVENTS");
+        gift.setFont(new Font("Arial", Font.PLAIN, 58));
+        JLabel callout = new JLabel("<html><div style='text-align:center;'><i>Turn Your Ideas<br>Into Unforgettable Events!</i></div></html>");
+        callout.setForeground(NAVY);
+        callout.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 25));
+        callout.setHorizontalAlignment(SwingConstants.CENTER);
+        GradientButton createNow = new GradientButton("Create Event Now  →");
+        createNow.setForeground(Color.WHITE);
+        createNow.setFont(new Font("Arial", Font.BOLD, 17));
+        createNow.setPreferredSize(new Dimension(250, 58));
+        createNow.addActionListener(e -> createEvent());
+        createBanner.add(gift, BorderLayout.WEST);
+        createBanner.add(callout, BorderLayout.CENTER);
+        createBanner.add(createNow, BorderLayout.EAST);
+
+        body.add(banner);
+        body.add(Box.createVerticalStrut(18));
+        body.add(stats);
+        body.add(Box.createVerticalStrut(18));
+        body.add(servicesCard);
+        body.add(Box.createVerticalStrut(18));
+        body.add(createBanner);
+
+        JScrollPane scroll = new JScrollPane(body);
+        scroll.setBorder(null);
+        scroll.getViewport().setBackground(BG);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        setCenter(scroll);
+    }
+
+    static JPanel createDashboardStat(String icon, String value, String caption, Color color1, Color color2) {
+        GradientPanel card = new GradientPanel(color1, color2, 20);
+        card.setLayout(new BorderLayout(12, 0));
+        card.setBorder(new EmptyBorder(15, 20, 15, 18));
+        JLabel iconLabel = new JLabel(icon);
+        iconLabel.setForeground(Color.WHITE);
+        iconLabel.setFont(new Font("Arial", Font.BOLD, 38));
+        JPanel text = new JPanel();
+        text.setOpaque(false);
+        text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+        JLabel number = new JLabel(value);
+        number.setForeground(Color.WHITE);
+        number.setFont(new Font("Arial", Font.BOLD, 32));
+        JLabel label = new JLabel(caption);
+        label.setForeground(Color.WHITE);
+        label.setFont(new Font("Arial", Font.PLAIN, 16));
+        text.add(Box.createVerticalGlue());
+        text.add(number);
+        text.add(Box.createVerticalStrut(4));
+        text.add(label);
+        text.add(Box.createVerticalGlue());
+        card.add(iconLabel, BorderLayout.WEST);
+        card.add(text, BorderLayout.CENTER);
+        return card;
+    }
+
+    static JPanel createServiceTile(String icon, String line1, String line2) {
+        JPanel tile = new JPanel();
+        tile.setBackground(new Color(235, 240, 255));
+        tile.setBorder(BorderFactory.createLineBorder(new Color(220, 228, 248)));
+        tile.setLayout(new BoxLayout(tile, BoxLayout.Y_AXIS));
+        JLabel iconLabel = new JLabel(icon);
+        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        iconLabel.setFont(new Font("Arial", Font.PLAIN, 30));
+        JLabel name = new JLabel("<html><div style='text-align:center;'>" + line1 + "<br>" + line2 + "</div></html>");
+        name.setAlignmentX(Component.CENTER_ALIGNMENT);
+        name.setHorizontalAlignment(SwingConstants.CENTER);
+        name.setForeground(TEXT);
+        name.setFont(new Font("Arial", Font.BOLD, 14));
+        tile.add(Box.createVerticalGlue());
+        tile.add(iconLabel);
+        tile.add(Box.createVerticalStrut(8));
+        tile.add(name);
+        tile.add(Box.createVerticalGlue());
+        return tile;
+    }
+    // ================= CREATE EVENT =================
+
+    static void createEvent() {
+
+        JTextField eventNameField = new JTextField();
+
+        JComboBox<String> eventTypeBox = new JComboBox<>(new String[]{
+
+                "Wedding", "Holud", "Birthday", "Seminar", "Concert",
+
+                "University Program", "Corporate Event", "Sports Event", "Cultural Program", "Other"
+
+        });
+
+        JTextField dateField = new JTextField();
+
+        JTextField guestField = new JTextField();
+
+        JTextField scheduleField = new JTextField();
+
+
+
+        Object[] fields = {
+
+                "Event Name:", eventNameField,
+
+                "Event Type:", eventTypeBox,
+
+                "Event Date:", dateField,
+
+                "Number of Guests:", guestField,
+
+                "Event Schedule:", scheduleField
+
+        };
+
+
+
+        int result = JOptionPane.showConfirmDialog(frame, fields, "Step 1: Create New Event", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result != JOptionPane.OK_OPTION) return;
+
+
+
+        String eventName = eventNameField.getText().trim();
+
+        String eventType = (String) eventTypeBox.getSelectedItem();
+
+        String date = dateField.getText().trim();
+
+        String schedule = scheduleField.getText().trim();
+
+        int guests;
+
+        try { guests = Integer.parseInt(guestField.getText().trim()); }
+
+        catch (Exception e) { message("Please enter a valid guest number.", true); return; }
+
+
+
+        if (eventName.isEmpty() || date.isEmpty() || guests <= 0) {
+
+            message("Please enter valid event information.", true); return;
+
+        }
+
+
+
+        ArrayList<Venue> suitable = new ArrayList<>();
+
+        for (Venue v : venues) if (v.capacity >= guests) suitable.add(v);
+
+        if (suitable.isEmpty()) { message("No suitable venue found for " + guests + " guests.", true); return; }
+
+
+
+        Venue selectedVenue = (Venue) JOptionPane.showInputDialog(frame,
+
+                "Step 2: Select a suitable venue:", "Venue Selection",
+
+                JOptionPane.QUESTION_MESSAGE, null, suitable.toArray(), suitable.get(0));
+
+        if (selectedVenue == null) return;
+
+
+
+        if (foodPackages.isEmpty()) { message("No food package available. Ask admin to add one.", true); return; }
+
+
+
+        FoodPackage selectedFood = (FoodPackage) JOptionPane.showInputDialog(frame,
+
+                "Step 3: Select Food Package:\nPackage price is calculated automatically from its items.",
+
+                "Food Package", JOptionPane.QUESTION_MESSAGE, null,
+
+                foodPackages.toArray(), foodPackages.get(0));
+
+        if (selectedFood == null) return;
+
+
+
+        int customize = JOptionPane.showConfirmDialog(frame,
+
+                "Do you want to customize this package by selecting/removing individual food items?",
+
+                "Customize Package", JOptionPane.YES_NO_OPTION);
+
+
+
+        ArrayList<FoodItem> finalFoodItems = new ArrayList<>();
+
+        if (customize == JOptionPane.YES_OPTION) {
+
+            JList<FoodItem> list = new JList<>(foodItems.toArray(new FoodItem[0]));
+
+            list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
+            ArrayList<Integer> indexes = new ArrayList<>();
+
+            for (FoodItem item : selectedFood.items) indexes.add(foodItems.indexOf(item));
+
+            int[] selectedIndexes = indexes.stream().filter(i -> i >= 0).mapToInt(Integer::intValue).toArray();
+
+            list.setSelectedIndices(selectedIndexes);
+
+            JScrollPane sp = new JScrollPane(list);
+
+            sp.setPreferredSize(new Dimension(430, 280));
+
+            int r = JOptionPane.showConfirmDialog(frame, sp,
+
+                    "Select Items - Total price will update automatically", JOptionPane.OK_CANCEL_OPTION);
+
+            if (r != JOptionPane.OK_OPTION) return;
+
+            finalFoodItems.addAll(list.getSelectedValuesList());
+
+        } else {
+
+            finalFoodItems.addAll(selectedFood.items);
+
+        }
+
+
+
+        if (finalFoodItems.isEmpty()) { message("Please select at least one food item.", true); return; }
+
+
+
+        JList<ServiceItem> serviceList = new JList<>(services.toArray(new ServiceItem[0]));
+
+        serviceList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
+        JScrollPane serviceScroll = new JScrollPane(serviceList);
+
+        serviceScroll.setPreferredSize(new Dimension(450, 260));
+
+        int serviceResult = JOptionPane.showConfirmDialog(frame, serviceScroll,
+
+                "Step 4: Select Event Services (Optional)", JOptionPane.OK_CANCEL_OPTION);
+
+        if (serviceResult != JOptionPane.OK_OPTION) return;
+
+        ArrayList<ServiceItem> selectedServices = new ArrayList<>(serviceList.getSelectedValuesList());
+
+
+
+        int ticketOption = JOptionPane.showConfirmDialog(frame,
+
+                "Is this a ticketed event?", "Ticket System", JOptionPane.YES_NO_CANCEL_OPTION);
+
+        if (ticketOption == JOptionPane.CANCEL_OPTION || ticketOption == JOptionPane.CLOSED_OPTION) return;
+
+        boolean ticketed = ticketOption == JOptionPane.YES_OPTION;
+
+        double ticketPrice = 0;
+
+        int ticketQuantity = 0;
+
+        if (ticketed) {
+
+            JTextField price = new JTextField();
+
+            JTextField qty = new JTextField();
+
+            int tr = JOptionPane.showConfirmDialog(frame,
+
+                    new Object[]{"Ticket Price:", price, "Ticket Quantity:", qty},
+
+                    "Ticket Details", JOptionPane.OK_CANCEL_OPTION);
+
+            if (tr != JOptionPane.OK_OPTION) return;
+
+            try {
+
+                ticketPrice = Double.parseDouble(price.getText().trim());
+
+                ticketQuantity = Integer.parseInt(qty.getText().trim());
+
+                if (ticketPrice < 0 || ticketQuantity < 0) throw new Exception();
+
+            } catch (Exception ex) { message("Invalid ticket information.", true); return; }
+
+        }
+
+
+
+        String[] paymentMethods = {"bKash", "Nagad", "Card", "Cash"};
+
+        String paymentMethod = (String) JOptionPane.showInputDialog(frame,
+
+                "Step 5: Select Payment Method:", "Payment",
+
+                JOptionPane.QUESTION_MESSAGE, null, paymentMethods, paymentMethods[0]);
+
+        if (paymentMethod == null) return;
+
+
+
+        Event event = new Event(eventName, eventType, date, guests, schedule,
+
+                selectedVenue, selectedFood, finalFoodItems, selectedServices,
+
+                ticketed, ticketPrice, ticketQuantity, loggedInUser, paymentMethod);
+
+
+
+        events.add(event);
+
+        showEventSummary(event);
+
+    }
+
+
+
+    static void showEventSummary(Event event) {
+
+        JTextArea area = new JTextArea(event.getSummary());
+
+        area.setEditable(false);
+
+        area.setFont(new Font("Monospaced", Font.PLAIN, 14));
+
+        area.setLineWrap(true);
+
+        area.setWrapStyleWord(true);
+
+        area.setCaretPosition(0);
+
+        JScrollPane sp = new JScrollPane(area);
+
+        sp.setPreferredSize(new Dimension(650, 520));
+
+        JOptionPane.showMessageDialog(frame, sp, "Event Successfully Created!", JOptionPane.INFORMATION_MESSAGE);
+
+        showMyEvents();
+
+    }
+
+
+
+    // ================= MY EVENTS =================
+
+    static void showMyEvents() {
+
+        setPageTitle("My Events");
+
+        JPanel body = pagePanel();
+
+        body.setLayout(new BorderLayout(10, 15));
+
+
+
+        JLabel title = heading("My Events");
+
+        body.add(title, BorderLayout.NORTH);
+
+
+
+        DefaultTableModel model = new DefaultTableModel(
+
+                new String[]{"Event", "Type", "Date", "Guests", "Venue", "Total Cost", "Organizer"}, 0) {
+
+            public boolean isCellEditable(int row, int column) { return false; }
+
+        };
+
+
+
+        ArrayList<Event> visible = new ArrayList<>();
+
+        for (Event e : events) {
+
+            if (loggedInUser instanceof Admin || e.organizer == loggedInUser) {
+
+                visible.add(e);
+
+                model.addRow(new Object[]{e.name, e.type, e.date, e.guests,
+
+                        e.venue.name, money(e.getTotalCost()), e.organizer.name});
+
+            }
+
+        }
+
+
+
+        JTable table = new JTable(model);
+
+        table.setRowHeight(32);
+
+        table.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+
+
+
+        body.add(new JScrollPane(table), BorderLayout.CENTER);
+
+
+
+        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 5));
+
+        bottom.setBackground(BG);
+
+        JButton details = new GradientButton("VIEW EVENT DETAILS");
+
+        details.setPreferredSize(new Dimension(250, 46));
+
+        JButton delete = new JButton("DELETE EVENT");
+
+        styleDangerButton(delete);
+
+        delete.setPreferredSize(new Dimension(180, 46));
+
+        bottom.add(details);
+
+        bottom.add(delete);
+
+
+
+        details.addActionListener(e -> {
+
+            int row = table.getSelectedRow();
+
+            if (row < 0) { message("Please select an event.", true); return; }
+
+            showEventSummary(visible.get(row));
+
+        });
+
+
+
+        delete.addActionListener(e -> {
+
+            int row = table.getSelectedRow();
+
+            if (row < 0) { message("Please select an event.", true); return; }
+
+            Event selected = visible.get(row);
+
+            int c = JOptionPane.showConfirmDialog(frame, "Delete " + selected.name + "?", "Confirm", JOptionPane.YES_NO_OPTION);
+
+            if (c == JOptionPane.YES_OPTION) {
+
+                events.remove(selected);
+
+                showMyEvents();
+
+            }
+
+        });
+
+
+
+        body.add(bottom, BorderLayout.SOUTH);
+
+        setCenter(body);
+
+    }
+
+
+
+    // ================= VENUES =================
+
+    static void showVenues() {
+
+        setPageTitle("Venues");
+
+        JPanel body = pagePanel();
+
+        body.setLayout(new BorderLayout(10, 15));
+
+        body.add(heading("Available Venues"), BorderLayout.NORTH);
+
+
+
+        DefaultTableModel model = new DefaultTableModel(new String[]{"Venue", "Location", "Capacity", "Cost"}, 0) {
+
+            public boolean isCellEditable(int r, int c) { return false; }
+
+        };
+
+        for (Venue v : venues) model.addRow(new Object[]{v.name, v.location, v.capacity, money(v.cost)});
+
+        JTable table = new JTable(model);
+
+        table.setRowHeight(34);
+
+        body.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        setCenter(body);
+
+    }
+
+
+
+    // ================= FOOD PACKAGES =================
+
+    static void showFoodPackages() {
+
+        setPageTitle("Food Packages");
+
+        JPanel body = pagePanel();
+
+        body.setLayout(new BorderLayout(10, 15));
+
+        body.add(heading("Food Packages & Automatic Item Pricing"), BorderLayout.NORTH);
+
+
+
+        DefaultTableModel model = new DefaultTableModel(new String[]{"Package", "Items", "Price / Person"}, 0) {
+
+            public boolean isCellEditable(int r, int c) { return false; }
+
+        };
+
+        for (FoodPackage p : foodPackages) {
+
+            model.addRow(new Object[]{p.name, p.itemsText(), money(p.getPerPersonCost())});
+
+        }
+
+        JTable table = new JTable(model);
+
+        table.setRowHeight(45);
+
+        body.add(new JScrollPane(table), BorderLayout.CENTER);
+
+
+
+        JPanel note = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        note.setBackground(BG);
+
+        JLabel text = new JLabel("Price / Person = Sum of all food item prices inside the package. Admin can add/edit items and the package cost updates automatically.");
+
+        text.setFont(new Font("Arial", Font.PLAIN, 13));
+
+        text.setForeground(MUTED);
+
+        note.add(text);
+
+        body.add(note, BorderLayout.SOUTH);
+
+        setCenter(body);
+
+    }
+
+
+
+    // ================= SERVICES =================
+
+    static void showServices() {
+
+        setPageTitle("Event Services");
+
+        JPanel body = pagePanel();
+
+        body.setLayout(new BorderLayout(10, 15));
+
+        body.add(heading("Available Event Services"), BorderLayout.NORTH);
+
+
+
+        DefaultTableModel model = new DefaultTableModel(new String[]{"Service", "Description", "Price"}, 0) {
+
+            public boolean isCellEditable(int r, int c) { return false; }
+
+        };
+
+        for (ServiceItem s : services) model.addRow(new Object[]{s.name, s.description, money(s.cost)});
+
+        JTable table = new JTable(model);
+
+        table.setRowHeight(36);
+
+        body.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        setCenter(body);
+
+    }
+
+
+
+    // ================= ADMIN PANEL =================
+
+    static void showAdminPanel() {
+
+        if (!(loggedInUser instanceof Admin)) {
+
+            message("Only admin can access this panel.", true);
+
+            return;
+
+        }
+
+        setPageTitle("Admin Panel");
+
+
+
+        JPanel body = pagePanel();
+
+        body.setLayout(new BorderLayout(10, 20));
+
+        body.add(heading("Admin Management Panel"), BorderLayout.NORTH);
+
+
+
+        JPanel grid = new JPanel(new GridLayout(2, 3, 18, 18));
+
+        grid.setBackground(BG);
+
+
+
+        JButton usersBtn = adminCard("Manage Users", "View organizer accounts");
+
+        JButton venueBtn = adminCard("Manage Venues", "Add venue and venue price");
+
+        JButton itemBtn = adminCard("Manage Food Items", "Add item and item price");
+
+        JButton packageBtn = adminCard("Manage Food Packages", "Select package items automatically");
+
+        JButton serviceBtn = adminCard("Manage Services", "Add service and price");
+
+        JButton reportBtn = adminCard("System Report", "Events and total values");
+
+
+
+        grid.add(usersBtn); grid.add(venueBtn); grid.add(itemBtn);
+
+        grid.add(packageBtn); grid.add(serviceBtn); grid.add(reportBtn);
+
+
+
+        usersBtn.addActionListener(e -> manageUsers());
+
+        venueBtn.addActionListener(e -> manageVenues());
+
+        itemBtn.addActionListener(e -> manageFoodItems());
+
+        packageBtn.addActionListener(e -> manageFoodPackages());
+
+        serviceBtn.addActionListener(e -> manageServices());
+
+        reportBtn.addActionListener(e -> showReport());
+
+
+
+        body.add(grid, BorderLayout.CENTER);
+
+        setCenter(body);
+
+    }
+
+
+
+    static JButton adminCard(String title, String subtitle) {
+
+        JButton b = new JButton("<html><div style='text-align:center;'><b style='font-size:17px;'>" + title + "</b><br><br><span style='font-size:12px;'>" + subtitle + "</span></div></html>");
+
+        b.setBackground(Color.WHITE);
+
+        b.setForeground(TEXT);
+
+        b.setFocusPainted(false);
+
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        b.setBorder(BorderFactory.createLineBorder(CARD_BORDER));
+
+        return b;
+
+    }
+
+
+
+    static void manageUsers() {
+
+        DefaultTableModel model = new DefaultTableModel(new String[]{"Name", "Email", "Role"}, 0) {
+
+            public boolean isCellEditable(int r, int c) { return false; }
+
+        };
+
+        for (User u : users) model.addRow(new Object[]{u.name, u.email, u.getRole()});
+
+        JTable table = new JTable(model);
+
+        JScrollPane sp = new JScrollPane(table);
+
+        sp.setPreferredSize(new Dimension(600, 350));
+
+        JOptionPane.showMessageDialog(frame, sp, "Registered Users", JOptionPane.INFORMATION_MESSAGE);
+
+    }
+
+
+
+    static void manageVenues() {
+
+        while (true) {
+
+            String[] options = {"View Venues", "Add Venue", "Remove Venue", "Close"};
+
+            int choice = JOptionPane.showOptionDialog(frame, "Venue Management", "Admin - Venues",
+
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+
+            if (choice == 0) showVenuesDialog();
+
+            else if (choice == 1) addVenueDialog();
+
+            else if (choice == 2) removeVenueDialog();
+
+            else break;
+
+        }
+
+    }
+
+
+
+    static void showVenuesDialog() {
+
+        JTextArea area = new JTextArea();
+
+        for (Venue v : venues) area.append(v.details() + "\n\n--------------------\n\n");
+
+        area.setEditable(false);
+
+        JScrollPane sp = new JScrollPane(area); sp.setPreferredSize(new Dimension(500, 400));
+
+        JOptionPane.showMessageDialog(frame, sp, "Venues", JOptionPane.INFORMATION_MESSAGE);
+
+    }
+
+
+
+    static void addVenueDialog() {
+
+        JTextField n = new JTextField(); JTextField l = new JTextField(); JTextField c = new JTextField(); JTextField cost = new JTextField();
+
+        int r = JOptionPane.showConfirmDialog(frame, new Object[]{"Name", n, "Location", l, "Capacity", c, "Cost", cost}, "Add Venue", JOptionPane.OK_CANCEL_OPTION);
+
+        if (r != JOptionPane.OK_OPTION) return;
+
+        try {
+
+            venues.add(new Venue(n.getText().trim(), l.getText().trim(), Integer.parseInt(c.getText().trim()), Double.parseDouble(cost.getText().trim())));
+
+            message("Venue added successfully.", false);
+
+        } catch (Exception e) { message("Invalid venue information.", true); }
+
+    }
+
+
+
+    static void removeVenueDialog() {
+
+        if (venues.isEmpty()) return;
+
+        Venue v = (Venue) JOptionPane.showInputDialog(frame, "Select venue to remove", "Remove Venue", JOptionPane.WARNING_MESSAGE, null, venues.toArray(), venues.get(0));
+
+        if (v != null) venues.remove(v);
+
+    }
+
+
+
+    // ================= FOOD ITEM MANAGEMENT =================
+
+    static void manageFoodItems() {
+
+        while (true) {
+
+            String[] options = {"View Items", "Add Item", "Edit Item Price", "Remove Item", "Close"};
+
+            int choice = JOptionPane.showOptionDialog(frame,
+
+                    "Food item price directly affects every package containing that item.",
+
+                    "Admin - Food Items", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+
+                    null, options, options[0]);
+
+            if (choice == 0) showFoodItemsDialog();
+
+            else if (choice == 1) addFoodItemDialog();
+
+            else if (choice == 2) editFoodItemDialog();
+
+            else if (choice == 3) removeFoodItemDialog();
+
+            else break;
+
+        }
+
+    }
+
+
+
+    static void showFoodItemsDialog() {
+
+        DefaultTableModel model = new DefaultTableModel(new String[]{"Item", "Price / Person"}, 0) {
+
+            public boolean isCellEditable(int r, int c) { return false; }
+
+        };
+
+        for (FoodItem i : foodItems) model.addRow(new Object[]{i.name, money(i.price)});
+
+        JTable table = new JTable(model);
+
+        JScrollPane sp = new JScrollPane(table); sp.setPreferredSize(new Dimension(450, 350));
+
+        JOptionPane.showMessageDialog(frame, sp, "Food Items", JOptionPane.INFORMATION_MESSAGE);
+
+    }
+
+
+
+    static void addFoodItemDialog() {
+
+        JTextField name = new JTextField(); JTextField price = new JTextField();
+
+        int r = JOptionPane.showConfirmDialog(frame, new Object[]{"Item Name", name, "Price per Person", price}, "Add Food Item", JOptionPane.OK_CANCEL_OPTION);
+
+        if (r != JOptionPane.OK_OPTION) return;
+
+        try {
+
+            String n = name.getText().trim();
+
+            double p = Double.parseDouble(price.getText().trim());
+
+            if (n.isEmpty() || p < 0) throw new Exception();
+
+            foodItems.add(new FoodItem(n, p));
+
+            message("Food item added. You can now add it to any package.", false);
+
+        } catch (Exception e) { message("Invalid item or price.", true); }
+
+    }
+
+
+
+    static void editFoodItemDialog() {
+
+        if (foodItems.isEmpty()) return;
+
+        FoodItem item = (FoodItem) JOptionPane.showInputDialog(frame, "Select item", "Edit Item Price", JOptionPane.QUESTION_MESSAGE, null, foodItems.toArray(), foodItems.get(0));
+
+        if (item == null) return;
+
+        String input = JOptionPane.showInputDialog(frame, "New price for " + item.name + ":", item.price);
+
+        if (input == null) return;
+
+        try {
+
+            double p = Double.parseDouble(input.trim());
+
+            if (p < 0) throw new Exception();
+
+            item.price = p;
+
+            message("Item price updated. All package prices now update automatically.", false);
+
+        } catch (Exception e) { message("Invalid price.", true); }
+
+    }
+
+
+
+    static void removeFoodItemDialog() {
+
+        if (foodItems.isEmpty()) return;
+
+        FoodItem item = (FoodItem) JOptionPane.showInputDialog(frame, "Select item to remove", "Remove Food Item", JOptionPane.WARNING_MESSAGE, null, foodItems.toArray(), foodItems.get(0));
+
+        if (item == null) return;
+
+        foodItems.remove(item);
+
+        for (FoodPackage p : foodPackages) p.items.remove(item);
+
+        message("Item removed from all packages.", false);
+
+    }
+
+
+
+    // ================= PACKAGE MANAGEMENT =================
+
+    static void manageFoodPackages() {
+
+        while (true) {
+
+            String[] options = {"View Packages", "Create Package", "Edit Package Items", "Remove Package", "Close"};
+
+            int choice = JOptionPane.showOptionDialog(frame,
+
+                    "Package Price = Sum of prices of the items you add to the package.",
+
+                    "Admin - Food Packages", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+
+                    null, options, options[0]);
+
+            if (choice == 0) showPackagesDialog();
+
+            else if (choice == 1) createPackageDialog();
+
+            else if (choice == 2) editPackageItemsDialog();
+
+            else if (choice == 3) removePackageDialog();
+
+            else break;
+
+        }
+
+    }
+
+
+
+    static void showPackagesDialog() {
+
+        JTextArea area = new JTextArea();
+
+        for (FoodPackage p : foodPackages) {
+
+            area.append("PACKAGE: " + p.name + "\n");
+
+            area.append("Items: " + p.itemsText() + "\n");
+
+            area.append("Automatic Price/Person: " + money(p.getPerPersonCost()) + "\n\n");
+
+        }
+
+        area.setEditable(false); area.setLineWrap(true); area.setWrapStyleWord(true);
+
+        JScrollPane sp = new JScrollPane(area); sp.setPreferredSize(new Dimension(550, 420));
+
+        JOptionPane.showMessageDialog(frame, sp, "Food Packages", JOptionPane.INFORMATION_MESSAGE);
+
+    }
+
+
+
+    static void createPackageDialog() {
+
+        String name = JOptionPane.showInputDialog(frame, "Package Name:");
+
+        if (name == null || name.trim().isEmpty()) return;
+
+        JList<FoodItem> list = new JList<>(foodItems.toArray(new FoodItem[0]));
+
+        list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
+        JScrollPane sp = new JScrollPane(list); sp.setPreferredSize(new Dimension(450, 300));
+
+        int r = JOptionPane.showConfirmDialog(frame, sp, "Select Items for " + name, JOptionPane.OK_CANCEL_OPTION);
+
+        if (r != JOptionPane.OK_OPTION) return;
+
+        if (list.getSelectedValuesList().isEmpty()) { message("Select at least one item.", true); return; }
+
+        FoodPackage p = new FoodPackage(name.trim());
+
+        for (FoodItem item : list.getSelectedValuesList()) p.addItem(item);
+
+        foodPackages.add(p);
+
+        message("Package created. Automatic price/person: " + money(p.getPerPersonCost()), false);
+
+    }
+
+
+
+    static void editPackageItemsDialog() {
+
+        if (foodPackages.isEmpty()) return;
+
+        FoodPackage p = (FoodPackage) JOptionPane.showInputDialog(frame, "Select package", "Edit Package", JOptionPane.QUESTION_MESSAGE, null, foodPackages.toArray(), foodPackages.get(0));
+
+        if (p == null) return;
+
+        JList<FoodItem> list = new JList<>(foodItems.toArray(new FoodItem[0]));
+
+        list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
+        ArrayList<Integer> selected = new ArrayList<>();
+
+        for (FoodItem item : p.items) selected.add(foodItems.indexOf(item));
+
+        list.setSelectedIndices(selected.stream().filter(i -> i >= 0).mapToInt(Integer::intValue).toArray());
+
+        JScrollPane sp = new JScrollPane(list); sp.setPreferredSize(new Dimension(450, 300));
+
+        int r = JOptionPane.showConfirmDialog(frame, sp, "Edit Items: " + p.name, JOptionPane.OK_CANCEL_OPTION);
+
+        if (r != JOptionPane.OK_OPTION) return;
+
+        p.items.clear(); p.items.addAll(list.getSelectedValuesList());
+
+        message("Package updated. New automatic price/person: " + money(p.getPerPersonCost()), false);
+
+    }
+
+
+
+    static void removePackageDialog() {
+
+        if (foodPackages.isEmpty()) return;
+
+        FoodPackage p = (FoodPackage) JOptionPane.showInputDialog(frame, "Select package", "Remove Package", JOptionPane.WARNING_MESSAGE, null, foodPackages.toArray(), foodPackages.get(0));
+
+        if (p != null) foodPackages.remove(p);
+
+    }
+
+
+
+    // ================= SERVICE MANAGEMENT =================
+
+    static void manageServices() {
+
+        while (true) {
+
+            String[] options = {"View Services", "Add Service", "Remove Service", "Close"};
+
+            int choice = JOptionPane.showOptionDialog(frame, "Service Management", "Admin - Services",
+
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+
+            if (choice == 0) showServicesDialog();
+
+            else if (choice == 1) addServiceDialog();
+
+            else if (choice == 2) removeServiceDialog();
+
+            else break;
+
+        }
+
+    }
+
+
+
+    static void showServicesDialog() {
+
+        JTextArea area = new JTextArea();
+
+        for (ServiceItem s : services) area.append(s.details() + "\n\n");
+
+        area.setEditable(false); JScrollPane sp = new JScrollPane(area); sp.setPreferredSize(new Dimension(500, 400));
+
+        JOptionPane.showMessageDialog(frame, sp, "Services", JOptionPane.INFORMATION_MESSAGE);
+
+    }
+
+
+
+    static void addServiceDialog() {
+
+        JTextField n = new JTextField(); JTextField d = new JTextField(); JTextField c = new JTextField();
+
+        int r = JOptionPane.showConfirmDialog(frame, new Object[]{"Service Name", n, "Description", d, "Price", c}, "Add Service", JOptionPane.OK_CANCEL_OPTION);
+
+        if (r != JOptionPane.OK_OPTION) return;
+
+        try {
+
+            services.add(new ServiceItem(n.getText().trim(), Double.parseDouble(c.getText().trim()), d.getText().trim()));
+
+            message("Service added successfully.", false);
+
+        } catch (Exception e) { message("Invalid service information.", true); }
+
+    }
+
+
+
+    static void removeServiceDialog() {
+
+        if (services.isEmpty()) return;
+
+        ServiceItem s = (ServiceItem) JOptionPane.showInputDialog(frame, "Select service", "Remove Service", JOptionPane.WARNING_MESSAGE, null, services.toArray(), services.get(0));
+
+        if (s != null) services.remove(s);
+
+    }
+
+
+
+    // ================= REPORT =================
+
+    static void showReport() {
+
+        int totalEvents = events.size();
+
+        double totalValue = 0;
+
+        for (Event e : events) totalValue += e.getTotalCost();
+
+        JTextArea area = new JTextArea();
+
+        area.setFont(new Font("Arial", Font.PLAIN, 16));
+
+        area.setText("EVENTVERSE SYSTEM REPORT\n\n" +
+
+                "Total Users: " + users.size() + "\n" +
+
+                "Total Events: " + totalEvents + "\n" +
+
+                "Total Venues: " + venues.size() + "\n" +
+
+                "Food Items: " + foodItems.size() + "\n" +
+
+                "Food Packages: " + foodPackages.size() + "\n" +
+
+                "Event Services: " + services.size() + "\n\n" +
+
+                "Total Event Value: " + money(totalValue));
+
+        area.setEditable(false);
+
+        JOptionPane.showMessageDialog(frame, area, "System Report", JOptionPane.INFORMATION_MESSAGE);
+
+    }
+
+
+
+    // ================= HELPERS =================
+
+    static JPanel pagePanel() {
+
+        JPanel p = new JPanel();
+
+        p.setBackground(BG);
+
+        p.setBorder(new EmptyBorder(25, 30, 25, 30));
+
+        return p;
+
+    }
+
+
+
+    static JLabel heading(String text) {
+
+        JLabel label = new JLabel(text);
+
+        label.setFont(new Font("Arial", Font.BOLD, 26));
+
+        label.setForeground(TEXT);
+
+        return label;
+
+    }
+
+
+
+    static void styleOutlineButton(JButton button) {
+
+        button.setBackground(Color.WHITE);
+
+        button.setForeground(PURPLE);
+
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+
+        button.setFocusPainted(false);
+
+        button.setBorder(BorderFactory.createLineBorder(PURPLE, 1));
+
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+    }
+
+
+
+    static void styleDangerButton(JButton button) {
+
+        button.setBackground(new Color(220, 53, 69));
+
+        button.setForeground(Color.WHITE);
+
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+
+        button.setFocusPainted(false);
+
+        button.setBorderPainted(false);
+
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+    }
+
+
+
+    static void message(String text, boolean error) {
+
+        JOptionPane.showMessageDialog(frame, text, error ? "Error" : "EventVerse",
+
+                error ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
+
+    }
+
+
+
+    static String money(double value) {
+
+        return "৳" + MONEY.format(value);
+
+    }
+
+
+
+    static void refresh() {
+
+        rootPanel.revalidate();
+
+        rootPanel.repaint();
+
+    }
+
+}
+
+
+
+class EventVerseMark extends JComponent {
+    private final int size;
+    EventVerseMark(int size) {
+        this.size = size;
+        setPreferredSize(new Dimension(size, size));
+        setMinimumSize(new Dimension(size, size));
+        setMaximumSize(new Dimension(size, size));
+        setOpaque(false);
+    }
+    @Override protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        int pad = Math.max(3, size / 12);
+        int x = pad, y = pad + size / 8, w = size - 2 * pad, h = size - 2 * pad - size / 8;
+        g2.setColor(new Color(25, 115, 245));
+        g2.fillRoundRect(x, y, w, h, size / 7, size / 7);
+        g2.setColor(Color.WHITE);
+        g2.fillRoundRect(x + size / 12, y + size / 7, w - size / 6, h - size / 5, size / 15, size / 15);
+        g2.setColor(new Color(25, 115, 245));
+        g2.fillRect(x + size / 12, y + size / 7, w - size / 6, size / 7);
+        g2.setStroke(new BasicStroke(Math.max(2f, size / 22f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.drawLine(x + size / 3, y + size / 10, x + size / 3, y + size / 3);
+        g2.drawLine(x + 2 * size / 3, y + size / 10, x + 2 * size / 3, y + size / 3);
+        int cx = x + w / 2, cy = y + h / 2 + size / 9, r = size / 5;
+        Polygon star = new Polygon();
+        for (int i = 0; i < 10; i++) {
+            double a = -Math.PI / 2 + i * Math.PI / 5;
+            int rr = (i % 2 == 0) ? r : r / 2;
+            star.addPoint(cx + (int)(Math.cos(a) * rr), cy + (int)(Math.sin(a) * rr));
+        }
+        g2.setColor(new Color(105, 50, 220));
+        g2.fillPolygon(star);
+        g2.dispose();
+    }
+}
+// ================= CUSTOM UI CLASSES =================
+
+class GradientPanel extends JPanel {
+
+    private final Color color1;
+
+    private final Color color2;
+
+    private final int radius;
+
+
+
+    GradientPanel(Color color1, Color color2, int radius) {
+
+        this.color1 = color1;
+
+        this.color2 = color2;
+
+        this.radius = radius;
+
+        setOpaque(false);
+
+    }
+
+
+
+    protected void paintComponent(Graphics g) {
+
+        Graphics2D g2 = (Graphics2D) g.create();
+
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2.setPaint(new GradientPaint(0, 0, color1, getWidth(), 0, color2));
+
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+
+        g2.dispose();
+
+        super.paintComponent(g);
+
+    }
+
+}
+
+
+
+class RoundedPanel extends JPanel {
+
+    private final int radius;
+
+    private final Color color;
+
+
+
+    RoundedPanel(int radius, Color color) {
+
+        this.radius = radius;
+
+        this.color = color;
+
+        setOpaque(false);
+
+    }
+
+
+
+    protected void paintComponent(Graphics g) {
+
+        Graphics2D g2 = (Graphics2D) g.create();
+
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2.setColor(color);
+
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+
+        g2.dispose();
+
+        super.paintComponent(g);
+
+    }
+
+}
+
+
+
+class GradientButton extends JButton {
+
+    GradientButton(String text) {
+
+        super(text);
+
+        setContentAreaFilled(false);
+
+        setOpaque(false);
+
+        setFocusPainted(false);
+
+        setBorderPainted(false);
+
+        setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+    }
+
+
+
+    protected void paintComponent(Graphics g) {
+
+        Graphics2D g2 = (Graphics2D) g.create();
+
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2.setPaint(new GradientPaint(0, 0, new Color(0, 122, 255), getWidth(), 0, new Color(130, 45, 235)));
+
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+
+        g2.dispose();
+
+        super.paintComponent(g);
+
+    }
+
+}
+
+
+
+// ================= USER CLASSES =================
+
+class User {
+
+    String name;
+
+    String email;
+
+    String password;
+
+
+
+    User(String name, String email, String password) {
+
+        this.name = name;
+
+        this.email = email;
+
+        this.password = password;
+
+    }
+
+
+
+    String getRole() { return "User"; }
+
+}
+
+
+
+class Organizer extends User {
+
+    Organizer(String name, String email, String password) {
+
+        super(name, email, password);
+
+    }
+
+
+
+    String getRole() { return "Organizer"; }
+
+}
+
+
+
+class Admin extends User {
+
+    Admin(String name, String email, String password) {
+
+        super(name, email, password);
+
+    }
+
+
+
+    String getRole() { return "Admin"; }
+
+}
+
+
+
+// ================= VENUE =================
+
+class Venue {
+
+    String name;
+
+    String location;
+
+    int capacity;
+
+    double cost;
+
+
+
+    Venue(String name, String location, int capacity, double cost) {
+
+        this.name = name;
+
+        this.location = location;
+
+        this.capacity = capacity;
+
+        this.cost = cost;
+
+    }
+
+
+
+    String details() {
+
+        return "Venue: " + name +
+
+                "\nLocation: " + location +
+
+                "\nCapacity: " + capacity + " persons" +
+
+                "\nCost: " + EventVerseApp.money(cost);
+
+    }
+
+
+
+    public String toString() {
+
+        return name + " | " + location + " | Capacity: " + capacity + " | " + EventVerseApp.money(cost);
+
+    }
+
+}
+
+
+
+// ================= FOOD ITEM =================
+
+class FoodItem {
+
+    String name;
+
+    double price;
+
+
+
+    FoodItem(String name, double price) {
+
+        this.name = name;
+
+        this.price = price;
+
+    }
+
+
+
+    public String toString() {
+
+        return name + " - " + EventVerseApp.money(price) + " per person";
+
+    }
+
+}
+
+
+
+// ================= FOOD PACKAGE =================
+
+class FoodPackage {
+
+    String name;
+
+    ArrayList<FoodItem> items = new ArrayList<>();
+
+
+
+    FoodPackage(String name) {
+
+        this.name = name;
+
+    }
+
+
+
+    void addItem(FoodItem item) {
+
+        if (item != null && !items.contains(item)) items.add(item);
+
+    }
+
+
+
+    double getPerPersonCost() {
+
+        double total = 0;
+
+        for (FoodItem item : items) total += item.price;
+
+        return total;
+
+    }
+
+
+
+    String itemsText() {
+
+        if (items.isEmpty()) return "No items";
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < items.size(); i++) {
+
+            sb.append(items.get(i).name);
+
+            if (i < items.size() - 1) sb.append(", ");
+
+        }
+
+        return sb.toString();
+
+    }
+
+
+
+    String details() {
+
+        return "Package: " + name +
+
+                "\nItems: " + itemsText() +
+
+                "\nAutomatic Price/Person: " + EventVerseApp.money(getPerPersonCost());
+
+    }
+
+
+
+    public String toString() {
+
+        return name + " | " + EventVerseApp.money(getPerPersonCost()) + " / person";
+
+    }
+
+}
+
+
+
+// ================= SERVICE =================
+
+class ServiceItem {
+
+    String name;
+
+    double cost;
+
+    String description;
+
+
+
+    ServiceItem(String name, double cost, String description) {
+
+        this.name = name;
+
+        this.cost = cost;
+
+        this.description = description;
+
+    }
+
+
+
+    String details() {
+
+        return "Service: " + name +
+
+                "\nDescription: " + description +
+
+                "\nCost: " + EventVerseApp.money(cost);
+
+    }
+
+
+
+    public String toString() {
+
+        return name + " | " + EventVerseApp.money(cost);
+
+    }
+
+}
+
+
+
+// ================= EVENT =================
+
+class Event {
+
+    String name;
+
+    String type;
+
+    String date;
+
+    int guests;
+
+    String schedule;
+
+    Venue venue;
+
+    FoodPackage foodPackage;
+
+    ArrayList<FoodItem> selectedFoodItems;
+
+    ArrayList<ServiceItem> selectedServices;
+
+    boolean ticketed;
+
+    double ticketPrice;
+
+    int ticketQuantity;
+
+    User organizer;
+
+    String paymentMethod;
+
+
+
+    Event(String name, String type, String date, int guests, String schedule,
+
+          Venue venue, FoodPackage foodPackage, ArrayList<FoodItem> selectedFoodItems,
+
+          ArrayList<ServiceItem> selectedServices, boolean ticketed,
+
+          double ticketPrice, int ticketQuantity, User organizer, String paymentMethod) {
+
+        this.name = name;
+
+        this.type = type;
+
+        this.date = date;
+
+        this.guests = guests;
+
+        this.schedule = schedule;
+
+        this.venue = venue;
+
+        this.foodPackage = foodPackage;
+
+        this.selectedFoodItems = new ArrayList<>(selectedFoodItems);
+
+        this.selectedServices = new ArrayList<>(selectedServices);
+
+        this.ticketed = ticketed;
+
+        this.ticketPrice = ticketPrice;
+
+        this.ticketQuantity = ticketQuantity;
+
+        this.organizer = organizer;
+
+        this.paymentMethod = paymentMethod;
+
+    }
+
+
+
+    double getFoodPerPersonCost() {
+
+        double total = 0;
+
+        for (FoodItem item : selectedFoodItems) total += item.price;
+
+        return total;
+
+    }
+
+
+
+    double getFoodCost() {
+
+        return getFoodPerPersonCost() * guests;
+
+    }
+
+
+
+    double getServiceCost() {
+
+        double total = 0;
+
+        for (ServiceItem service : selectedServices) total += service.cost;
+
+        return total;
+
+    }
+
+
+
+    double getTotalCost() {
+
+        return venue.cost + getFoodCost() + getServiceCost();
+
+    }
+
+
+
+    String getFoodItemsText() {
+
+        if (selectedFoodItems.isEmpty()) return "None";
+
+        StringBuilder sb = new StringBuilder();
+
+        for (FoodItem item : selectedFoodItems) {
+
+            sb.append("• ").append(item.name).append(" - ")
+
+                    .append(EventVerseApp.money(item.price)).append(" per person\n");
+
+        }
+
+        return sb.toString();
+
+    }
+
+
+
+    String getServicesText() {
+
+        if (selectedServices.isEmpty()) return "None";
+
+        StringBuilder sb = new StringBuilder();
+
+        for (ServiceItem service : selectedServices) {
+
+            sb.append("• ").append(service.name).append(" - ")
+
+                    .append(EventVerseApp.money(service.cost)).append("\n");
+
+        }
+
+        return sb.toString();
+
+    }
+
+
+
+    String getSummary() {
+
+        return "================ EVENTVERSE EVENT SUMMARY ================\n\n" +
+
+                "Event Name: " + name + "\n" +
+
+                "Event Type: " + type + "\n" +
+
+                "Date: " + date + "\n" +
+
+                "Schedule: " + schedule + "\n" +
+
+                "Organizer: " + organizer.name + "\n" +
+
+                "Guests: " + guests + "\n\n" +
+
+                "---------------- VENUE ----------------\n" +
+
+                venue.details() + "\n\n" +
+
+                "---------------- FOOD ----------------\n" +
+
+                "Selected Package: " + foodPackage.name + "\n" +
+
+                getFoodItemsText() +
+
+                "Food Cost/Person: " + EventVerseApp.money(getFoodPerPersonCost()) + "\n" +
+
+                "Food Total (" + guests + " guests): " + EventVerseApp.money(getFoodCost()) + "\n\n" +
+
+                "---------------- SERVICES ----------------\n" +
+
+                getServicesText() +
+
+                "Service Total: " + EventVerseApp.money(getServiceCost()) + "\n\n" +
+
+                "---------------- PAYMENT ----------------\n" +
+
+                "Payment Method: " + paymentMethod + "\n" +
+
+                "Ticketed Event: " + (ticketed ? "Yes" : "No") + "\n" +
+
+                (ticketed ? "Ticket Price: " + EventVerseApp.money(ticketPrice) + "\nTicket Quantity: " + ticketQuantity + "\n" : "") +
+
+                "\n==========================================================\n" +
+
+                "TOTAL EVENT COST: " + EventVerseApp.money(getTotalCost()) + "\n" +
+
+                "==========================================================";
+
+    }
+
+
+
+    public String toString() {
+
+        return name + " | " + type + " | " + date;
+
+    }
+
+}
+
+
+
